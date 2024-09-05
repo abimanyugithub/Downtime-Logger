@@ -1,0 +1,19 @@
+{% for mesin in list_mesin %}
+<tr>
+    <td>{{ mesin.code_machine }}</td>
+    <td>{{ mesin.no_machine }}</td>
+    <td>{{ mesin.description }}</td>
+    <td>{{ mesin.is_active }}</td>
+    <td><a class="btn btn-primary ml-2" href="{% url 'update_mesin' pk=mesin.pk %}">Edit</a>
+        <form action="{% url 'delete_mesin' pk=mesin.pk %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button class="btn btn-danger ml-2" type="submit">Delete</button>
+        </form>
+
+        <form action="{% url 'update_status_mesin' pk=mesin.pk %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button class="btn btn-info" type="submit">Change</button>
+        </form>
+        </td>
+</tr>
+{% endfor %}

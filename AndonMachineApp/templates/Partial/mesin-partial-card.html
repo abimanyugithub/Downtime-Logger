@@ -1,0 +1,19 @@
+{% for mesin in list_mesin %}
+<div class="col-lg-6 col-xl-3 mb-4">
+    <div class="card {% if mesin.is_active %}bg-success{% else %}bg-dark{% endif %} text-white h-100">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="me-3">
+                    <div class="text-white-75 small">{{ mesin.category_machine|upper }}</div>
+                    <div class="text-lg fw-bold">{{ mesin.no_machine}}</div>
+                </div>
+                <i class="feather-xl text-white-50" data-feather="check-square"></i>
+            </div>
+        </div>
+        <div class="card-footer d-flex align-items-center justify-content-between small">
+            <a class="text-white stretched-link" href="#!">View Tasks</a>
+            <div class="text-white"><i class="fas fa-angle-right"></i></div>
+        </div>
+    </div>
+</div>
+{% endfor %}
