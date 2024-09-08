@@ -10,7 +10,7 @@
                 <main>
                     <div class="container-xl px-4">
                         <div class="row justify-content-center">
-                            <div class="col-lg-5">
+                            <div class="col-lg-6">
                                 <!-- Basic login form-->
                                 <div class="card shadow-lg border-0 rounded-lg mt-5">
                                     <div class="card-header">Action</div>
@@ -20,11 +20,11 @@
                                             <div class="sbp-preview-text">
                                                 {% for role in roles %}
                                                 <div class="d-flex justify-content-center">
-                                                    <button type="button" class="btn {% if role.value in disabled_roles %}btn-dark{% else %}btn-yellow{% endif %} w-100 mb-3 p-5" type="button" data-bs-toggle="modal"
-                                                    data-bs-target="#{{ role.value }}" {% if role.value in disabled_roles %}disabled{% endif %}>{{ role.value|upper }}</button>
-                                                    {% block modal %}
-                                                        {% include "./modal/modal-action.html" %}
-                                                    {% endblock modal %}
+                                                    <button type="button" class="btn {% if role.value in disabled_roles %}btn-dark{% else %}btn-orange{% endif %} w-100 mb-3 p-5" type="button" data-bs-toggle="modal"
+                                                    data-bs-target="#dtm-{{ role.value }}" {% if role.value in disabled_roles %}disabled{% endif %}>{{ role.value|upper }}</button>
+                                                    {% block modal_dt_mesin %}
+                                                        {% include "./modal/modal-status-dt.html" %}
+                                                    {% endblock modal_dt_mesin %}
                                                 </div>
                                                 {% endfor %}
                                             </div>
@@ -33,23 +33,39 @@
                                 </div>
                             </div>       
 
-                            <div class="col-lg-5">
+                            <div class="col-lg-6">
                                <!-- Basic login form-->
-                               <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                <div class="card-header">Machine {{nmr_mesin  }}</div>
-                                <div class="card-body">
-                                    <!-- Component Preview-->
-                                    <div class="sbp-preview">
-                                        <div class="sbp-preview-text">
-                                            The example above is a basic card with a card header and a card body. You can extend the card using any of the features included with Bootstrap. You can use utility classes to extend the look and feel of cards as well.
-                                            <p class="mb-0">
-                                                <span class="font-weight-bold">Note:</span>
-                                                The card styling in SB Admin Pro looks best with a light background color due to the background color of the card header, card body, and box shadow.
-                                            </p>
+                                <div class="card shadow-lg border-0 rounded-lg mt-5">
+                                    <div class="card-header">Machine {{ nmr_mesin }}</div>
+                                        <div class="card-body">
+                                            {{ btnfinish|safe }}
+                                            {% for dt_role in downtime_role %}
+                                            <div class="card card-icon mb-3">
+                                                <div class="row g-0">
+                                                    <div class="col-auto card-icon-aside {{ btncolor }}"><i class="me-1 text-white-50 fa {{ icon }} fa-spin"></i></div>
+                                                    <div class="col">
+                                                        <div class="card-body py-5">
+                                                            <h3 class="card-title">{{ dt_role.role|upper }}</h3>
+                                                            <p class="card-text">{{ dt_role.status }}</p>
+                                                            {% block modal_dt_role %}
+                                                                {% include "./modal/modal-status-role.html" %}
+                                                            {% endblock modal_dt_role %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto card-icon-aside text-white {{ btncolor2 }}">
+                                                        <button type="button" class="btn {{ btncolor2 }}" type="button" data-bs-toggle="modal"
+                                                            data-bs-target="#dtr-{{ dt_role.role }}"><i class="me-1 text-white-50 fa {{ icon2 }}"></i></button>
+                                                    </div>
+                                                    <div class="col-auto card-icon-aside text-white {{ btncolor3 }}">
+                                                        <button type="button" class="btn {{ btncolor3 }} {{ disablebtn }}" type="button" data-bs-toggle="modal"
+                                                            data-bs-target="#dtr-{{ dt_role.role }}" {{ disablebtn }}><i class="me-1 text-white-50 fa fa-reply"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                     </div>

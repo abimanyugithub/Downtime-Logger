@@ -2,8 +2,8 @@ from django.db import models
 
 class Mesin(models.Model):
     category_machine = models.CharField(max_length=255, null=True)
-    no_machine = models.CharField(max_length=255, unique=True)
-    description = models.TextField()
+    no_machine = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)  # Status mesin
     status = models.CharField(
         max_length=50,
@@ -11,7 +11,7 @@ class Mesin(models.Model):
     )
 
 
-class Downtime(models.Model):
+class DowntimeMesin(models.Model):
     machine = models.ForeignKey(Mesin, on_delete=models.CASCADE)
     # actor = models.CharField(max_length=255)
     start_time = models.DateTimeField()
@@ -28,8 +28,8 @@ class Downtime(models.Model):
     def __str__(self):
         return f"Downtime from {self.start_time} to {self.end_time}"
     
-class DowntimeByRole(models.Model):
-    downtime = models.ForeignKey(Downtime, on_delete=models.CASCADE)
+class DowntimeRole(models.Model):
+    downtime = models.ForeignKey(DowntimeMesin, on_delete=models.CASCADE)
     role = models.CharField(max_length=255)
     # start_time = models.DateTimeField()
     # end_time = models.DateTimeField(null=True, blank=True)

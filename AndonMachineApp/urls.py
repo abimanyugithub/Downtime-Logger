@@ -15,10 +15,11 @@ urlpatterns = [
     #path('mesin/number/<int:pk>/', views.DashboardMesin.as_view(), name='number_mesin'),
 
     path('andon/mesin/', views.DisplayAndon.as_view(), name='view_andon'),
-    path('downtime/mesin/', views.AddDowntime.as_view(), name='add_downtime'),
+    path('downtime/mesin/', views.StatusDowntimeMesin.as_view(), name='status_downtime_mesin'),
+    path('downtime/role/<str:pk>', views.StatusDowntimeRole.as_view(), name='status_downtime_role'),
 
     # trigger andon esp
-    path('andon/waiting-leader/', views.leader_trigger, name='trigger_leader'),
+    path('andon/esp32-response/', views.ControlTrigger, name='control_trigger'),
 
     # htmx response
     path('async-mesin-card/', views.AsyncMesinCard, name='async_mesin_card'),

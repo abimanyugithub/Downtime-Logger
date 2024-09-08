@@ -1,5 +1,5 @@
 
-<div class="modal fade" id="{{ role.value }}" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="dtm-{{ role.value }}" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -22,7 +22,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
-                <form method="post" action="{% url 'add_downtime' %}?role={{ role.value }}">
+                <form method="post" action="{% url 'status_downtime_mesin' %}?role={{ role.value }}">
                     {% csrf_token %}
                     <input type="hidden" name="nmr_mesin" value="{{ nmr_mesin }}">
                     <input type="hidden" name="kategori_mesin" value="{{ kategori_mesin }}">
