@@ -1,28 +1,29 @@
 
-<div class="modal fade" id="dtr-{{ dt_role.role }}" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="dtr-{{ dt_role.data.role }}" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
       <div class="modal-content">
           <div class="modal-header">
-              <h5 class="modal-title" id="staticBackdropLabel">{{ title }} {{ dt_role.value|capfirst }}</h5>
+              <h5 class="modal-title" id="staticBackdropLabel">{{ title }} {{ dt_role.data.role|capfirst }}</h5>
               <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
               <div class="card card-icon mb-4">
                   <div class="row g-0">
-                      <div class="col-auto card-icon-aside {{ bgcolor }}"><i class="me-1 text-white-50 fa {{ icon }}"></i></div>
+                      <div class="col-auto card-icon-aside {{ dt_role.btn_color2 }}"><i class="me-1 text-white-50 fa {{ dt_role.icon2 }}"></i></div>
                       <div class="col">
                           <div class="card-body py-5">
                               <h5 class="card-title">{{ status }}</h5>
                               <p class="card-text">
-                                  W will send a notification to the <b>{{ dt_role.role|capfirst }}</b> to handle problems that occur with the machine. Please select "continue" to continue or "close" to cancel it.</p>
+                                <b>{{ dt_role.data.role|capfirst }}</b> {{ dt_role.message }} 
+                              </p>
                           </div>
                       </div>
                   </div>
               </div>
           </div>
           <div class="modal-footer">
-              <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
-              <form method="post" action="{% url 'status_downtime_role' pk=dt_role.id %}">
+              <button class="btn btn-pink" type="button" data-bs-dismiss="modal">Close</button>
+              <form method="post" action="{% url 'status_downtime_role' pk=dt_role.data.id %}">
                   {% csrf_token %}
                   <input type="hidden" name="nmr_mesin" value="{{ nmr_mesin }}">
                   <input type="hidden" name="kategori_mesin" value="{{ kategori_mesin }}">
@@ -32,3 +33,39 @@
       </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="cancel-{{ dt_role.data.role }}" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">{{ dt_role.data.role|capfirst }}</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card card-icon mb-4">
+                    <div class="row g-0">
+                        <div class="col-auto card-icon-aside bg-blue"><i class="me-1 text-white-50 fa fa-reply"></i></div>
+                        <div class="col">
+                            <div class="card-body py-5">
+                                <h5 class="card-title">{{ status }}</h5>
+                                <p class="card-text">
+                                    Batal panggil <b>{{ dt_role.data.role|capfirst }}</b>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-pink" type="button" data-bs-dismiss="modal">Close</button>
+                <form method="post" action="{% url 'delete_downtime_role' pk=dt_role.data.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="nmr_mesin" value="{{ nmr_mesin }}">
+                    <input type="hidden" name="kategori_mesin" value="{{ kategori_mesin }}">
+                    <button class="btn btn-primary" type="submit">Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+  </div>

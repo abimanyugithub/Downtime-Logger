@@ -3,25 +3,26 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel">{{ title }} {{ role.value|capfirst }}</h5>
+                <h5 class="modal-title" id="staticBackdropLabel">Stop-Call-Wait {{ role.value|capfirst }}</h5>
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="card card-icon mb-4">
                     <div class="row g-0">
-                        <div class="col-auto card-icon-aside {{ bgcolor }}"><i class="me-1 text-white-50 fa {{ icon }}"></i></div>
+                        <div class="col-auto card-icon-aside bg-pink"><i class="me-1 text-white-50 fa fa-hand"></i></div>
                         <div class="col">
                             <div class="card-body py-5">
                                 <h5 class="card-title">{{ status }}</h5>
                                 <p class="card-text">
-                                    We will send a notification to the <b>{{ role.value|capfirst }}</b> to handle problems that occur with the machine. Please select "continue" to continue or "close" to cancel it.</p>
+                                    We will send a notification to the <b>{{ role.value|capfirst }}</b> to handle problems that occur with the machine. Please select "continue" to continue or "close" to cancel it.
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-pink" type="button" data-bs-dismiss="modal">Close</button>
                 <form method="post" action="{% url 'status_downtime_mesin' %}?role={{ role.value }}">
                     {% csrf_token %}
                     <input type="hidden" name="nmr_mesin" value="{{ nmr_mesin }}">

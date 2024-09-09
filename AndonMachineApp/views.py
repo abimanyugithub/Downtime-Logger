@@ -19,25 +19,15 @@ class Dashboard(TemplateView):
 class DashboardInjection(TemplateView):
     template_name = 'base/dashboard-injection.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['list_mesin'] = Mesin.objects.filter(category_machine="injection")
-        return context
-
 
 class DashboardBlow(TemplateView):
     template_name = 'base/dashboard-blow.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['list_mesin'] = Mesin.objects.filter(category_machine="blow")
-        return context
-
 
 class ListMesin(ListView):
     template_name = 'crud_mesin/list_machines.html'
     model = Mesin
     context_object_name = 'list_mesin'
+    ordering = ['category_machine', 'no_machine']
 
 
 class RegisterMesin(CreateView):
@@ -66,21 +56,70 @@ class RegisterMesin(CreateView):
         return context
 
 
+class UpdateMesin(UpdateView):
+    model = Mesin
+    fields = ['category_machine', 'no_machine', 'description']
+    template_name = 'crud_mesin/update-machine.html'
+    success_url = reverse_lazy('list_mesin')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['kategori_mesin'] = kategori_mesin
+        return context
+
+
 def AsyncMesin(request):
     list_mesin = Mesin.objects.all()
     return render(request, 'partial/mesin-partial.html', {'list_mesin': list_mesin})
 
+def AsyncMesinBlowCard(request):
+    list_mesin = Mesin.objects.filter(category_machine='blow').order_by('no_machine')
 
-def AsyncMesinCard(request):
-    list_mesin = Mesin.objects.all()
-    return render(request, 'partial/mesin-partial-card.html', {'list_mesin': list_mesin})
+    # Prepare list mesin dengan beberapa komponen "color"
+    mesin_card_color = []
 
+    # Determine color for each machine's status
+    for data in list_mesin:
+        if data.is_active and data.status == "standby":
+            bg_color = 'bg-teal'
 
-class UpdateMesin(UpdateView):
-    model = Mesin
-    fields = ['category_machine', 'no_machine', 'description']
-    template_name = 'CrudMesin/update-mesin.html'
-    success_url = '/'
+        elif ((data.is_active) and (data.status == "maintain" or data.status == "pending")):
+            bg_color = 'bg-warning'
+        
+        else:
+            bg_color = 'bg-gray-200'
+        
+        # Append machine and its background color to the list
+        mesin_card_color.append({
+            'data': data,
+            'bg_color': bg_color
+        })
+
+    return render(request, 'partial/mesin-partial-card-blw.html', {'list_mesin': mesin_card_color})
+
+def AsyncMesinInjectionCard(request):
+    list_mesin = Mesin.objects.filter(category_machine='injection').order_by('no_machine')
+
+    # Prepare list mesin dengan beberapa komponen "color"
+    mesin_card_color = []
+
+    # Determine color for each machine's status
+    for data in list_mesin:
+        if data.is_active and data.status == "standby":
+            bg_color = 'bg-teal'
+
+        elif ((data.is_active) and (data.status == "maintain" or data.status == "pending")):
+            bg_color = 'bg-warning'
+        else:
+            bg_color = 'bg-gray-200'
+        
+        # Append machine and its background color to the list
+        mesin_card_color.append({
+            'data': data,
+            'bg_color': bg_color
+        })
+
+    return render(request, 'partial/mesin-partial-card-inj.html', {'list_mesin': mesin_card_color})
 
 
 class UpdateStatusMesin(View):
@@ -113,10 +152,10 @@ class DisplayAndon(TemplateView):
         nmr_mesin = request.GET.get('machine')
 
         if kategori_mesin and nmr_mesin:
-            if Mesin.objects.filter(no_machine=nmr_mesin, category_machine=kategori_mesin).exists():
+            if Mesin.objects.filter(no_machine=nmr_mesin, category_machine=kategori_mesin, is_active=True).exists():
                 pass
             else:
-                return redirect(reverse('view_dashboard'))
+                return redirect(self.request.META.get('HTTP_REFERER'))
                 
         else:
             return redirect(reverse('view_dashboard'))
@@ -133,33 +172,17 @@ class DisplayAndon(TemplateView):
 
             # status "standby" atau "pending" enable tombol leader, disable lainnya
             all_roles = first_roles + roles
+            context['roles'] = all_roles
             if ((mesin.status == 'standby')):
-                context['roles'] = all_roles
                 context['disabled_roles'] = {role['value'] for role in roles}
 
             # status "repair" atau "off" enable tombol leader, disable lainnya
             elif ((mesin.status == 'maintain') or (mesin.status == 'off')):
-                context['roles'] = all_roles
                 context['disabled_roles'] = {role['value'] for role in first_roles}
 
             # status "repair" atau "off" enable tombol leader, disable lainnya
             elif (mesin.status == 'pending'):
-                context['roles'] = all_roles
                 context['disabled_roles'] = {role['value'] for role in all_roles}
-
-            '''
-            if mesin.status == "standby":
-                context['title'] = 'Stop-Call-Wait'
-                context['status'] = 'Was there a problem?'
-                context['icon'] = 'fa-hand'
-                context['bgcolor'] = 'bg-pink'
-
-            else:
-                context['title'] = 'Take Response'
-                context['status'] = 'Take on this downtime repair work'
-                context['icon'] = 'fa-wrench'
-                context['bgcolor'] = 'bg-secondary'
-            '''
 
         except Mesin.DoesNotExist:
             # Handle the case where the Mesin does not exist
@@ -171,27 +194,58 @@ class DisplayAndon(TemplateView):
             downtime_role = DowntimeRole.objects.filter(downtime=downtime_mesin)
             context['btncolor3'] = 'bg-red'
 
-            if any(role.status == "waiting" for role in downtime_role):
-                context['btntext'] = 'Take'
-                context['btncolor'] = 'bg-indigo'
-                context['icon'] = 'fa-hourglass'
-                context['icon2'] = 'fa-wrench'
-                context['btncolor2'] = 'bg-orange'
-                # context['btn'] = f'<button type="button" class="btn bg-warning" type="button" data-bs-toggle="modal" data-bs-target="#dtr-{downtime_role.id}"><i class="me-1 text-white-50 fa fa-wrench"></i></button>'
+            # Prepare list downtime_role dengan beberapa komponen context
+            multicontext_roles = []
 
-            # elif any(role.status == "done" for role in downtime_role):
-                #context['disablebtn'] = 'disabled'
+            # Determine masing-masing status downtime_role
+            for data in downtime_role:
+                if data.status == "waiting":
+                    btn_color = 'bg-indigo'
+                    icon = 'fa-hourglass fa-spin'
+                    icon2 = 'fa-wrench'
+                    btn_color2 = 'bg-orange'
+                    disable_btn2 = ''
+                    btn_color3 = 'bg-blue'
+                    disable_btn = ''
+                    message = 'ambil tugas ini'
 
-            else:
-                context['btntext'] = 'Finish'
-                context['btncolor'] = 'bg-orange'
-                context['icon'] = 'fa-cog'
-                context['icon2'] = 'fa-thumbs-up'
-                context['btncolor2'] = 'bg-success'
+                elif data.status == "done":
+                    btn_color = 'bg-teal'
+                    icon = 'fa-check-circle'
+                    icon2 = 'fa-thumbs-up'
+                    btn_color2 = 'bg-pink'
+                    disable_btn2 = 'disabled'
+                    btn_color3 = 'bg-pink'
+                    disable_btn = 'disabled'
+                    message = ''
+
+                else:
+                    btn_color = 'bg-orange'
+                    icon = 'fa-cog fa-spin'
+                    icon2 = 'fa-thumbs-up'
+                    btn_color2 = 'bg-teal'
+                    disable_btn2 = 'disabled'
+                    btn_color3 = 'bg-pink'
+                    disable_btn = ''
+                    message = 'selesai perbaikan'
+
+                
+                # Append role and color to the list
+                multicontext_roles.append({
+                    'data': data,
+                    'btn_color': btn_color,
+                    'icon': icon,
+                    'icon2': icon2,
+                    'btn_color2': btn_color2,
+                    'disable_btn2': disable_btn2,
+                    'btn_color3': btn_color3,
+                    'disable_btn': disable_btn,
+                    'message': message
+                })
 
             # tampilkan list role jika status mesin "maintain/pending"
-            if ((mesin.status == 'maintain') or (mesin.status == 'pending')):     
-                context['downtime_role'] = downtime_role
+            if ((mesin.status == 'maintain') or (mesin.status == 'pending')):
+                context['multicontext_roles'] = multicontext_roles
                 
 
             # tampilkan tombol finish jika semua status role "done" dan status mesin "maintain"
@@ -201,7 +255,7 @@ class DisplayAndon(TemplateView):
                 html += f'<input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">'
                 html += f'<input type="hidden" name="nmr_mesin" value="{downtime_mesin.machine.no_machine}">'
                 html += f'<input type="hidden" name="kategori_mesin" value="{downtime_mesin.machine.category_machine}">'
-                html += f'<button type="submit" class="btn btn-teal w-100 mb-3 p-5">FINISH</button>'
+                html += f'<button type="submit" class="btn btn-teal text-lg w-100 mb-3 p-5">FINISH</button>'
                 html += '</form>'
                 context['btnfinish'] = html
 
@@ -211,6 +265,11 @@ class DisplayAndon(TemplateView):
 
         context['nmr_mesin'] = nmr_mesin
         context['kategori_mesin'] = kategori_mesin
+
+        if kategori_mesin == "blow":
+            context['url'] = reverse('dashboard_mesin_blow')
+        else:
+            context['url'] = reverse('dashboard_mesin_injection')
 
         return context
     
@@ -235,19 +294,30 @@ class StatusDowntimeMesin(View):
                 start_time=timezone.now()
                 )
 
-                DowntimeRole.objects.create(
-                    downtime=downtime_instance,
-                    role=role,
-                    status="waiting"
-                )
+                # cek jika role sudah ada di id downtime tersebut
+                if DowntimeRole.objects.filter(downtime=downtime_instance, role=role).exists():
+                    return redirect(self.request.META.get('HTTP_REFERER'))
+                
+                else:
+                    DowntimeRole.objects.create(
+                        downtime=downtime_instance,
+                        role=role,
+                        status="waiting"
+                    )
 
             # create downtime role jika bukan "leader"
             elif mesin.status == 'maintain' and any(r['value'] == role for r in roles):
-                DowntimeRole.objects.create(
-                    downtime=downtime_instance,
-                    role=role,
-                    status="waiting"
-                )
+
+                # cek jika role sudah ada di id downtime tersebut
+                if DowntimeRole.objects.filter(downtime=downtime_instance, role=role).exists():
+                    return redirect(self.request.META.get('HTTP_REFERER'))
+                
+                else:
+                    DowntimeRole.objects.create(
+                        downtime=downtime_instance,
+                        role=role,
+                        status="waiting"
+                    )
 
             # finish process
             elif mesin.status == 'maintain':
@@ -286,7 +356,32 @@ class StatusDowntimeRole(View):
             role_instance_update.save()
 
         return redirect(self.request.META.get('HTTP_REFERER'))
+    
+    
+class DeleteDowntimeRole(View):
 
+    def post(self, request, pk):
+        role_instance_update = DowntimeRole.objects.get(id=pk)
+        kategori_mesin = request.POST.get('kategori_mesin')
+        nmr_mesin = request.POST.get('nmr_mesin')
+        mesin = Mesin.objects.get(no_machine=nmr_mesin, category_machine=kategori_mesin)
+        downtime_instance = DowntimeMesin.objects.filter(machine__no_machine=mesin.no_machine, machine__category_machine=mesin.category_machine).order_by('-start_time').first()
+
+        # kembali ke "standby" jika batal panggil leader 
+        if mesin and any(r['value'] == role_instance_update.role for r in first_roles):
+            mesin.status = 'standby'
+            mesin.save()
+
+            # hapus "downtime" & "role"
+            downtime_instance.delete()
+            role_instance_update.delete()
+
+        # jika others
+        elif mesin and any(r['value'] == role_instance_update.role for r in roles):
+            role_instance_update.delete()
+
+        return redirect(self.request.META.get('HTTP_REFERER'))
+    
 
 def ControlTrigger(request):
 
@@ -296,6 +391,28 @@ def ControlTrigger(request):
             "message": "waiting",
             "role": "leader"
         }
+
+    elif DowntimeRole.objects.filter(role="setter", status="waiting").exists():
+        data = {
+            "status": "success",
+            "message": "waiting",
+            "role": "setter"
+        }
+
+    elif DowntimeRole.objects.filter(role="maintenance", status="waiting").exists():
+        data = {
+            "status": "success",
+            "message": "waiting",
+            "role": "maintenance"
+        }
+
+    elif DowntimeRole.objects.filter(role="mold", status="waiting").exists():
+        data = {
+            "status": "success",
+            "message": "waiting",
+            "role": "mold"
+        }
+
     else:
         data = {
             "status": "success",

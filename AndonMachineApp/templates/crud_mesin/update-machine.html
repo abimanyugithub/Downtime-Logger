@@ -48,21 +48,21 @@
                                             {% csrf_token %}
                                             <div class="mb-3">
                                                 <label class="small mb-1">Category Machine *</label>
-                                                <select class="form-select" name="category_machine" id="category_machine">
+                                                <select class="form-select" name="category_machine" id="category_machine" required>
                                                     {% for option in kategori_mesin %}
-                                                        <option value="{{ option.value }}">{{ option.label }}</option>
+                                                        <option value="{{ option.value }}" {% if option.value == form.category_machine.value %}selected{% endif %}>{{ option.label }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="small mb-1" for="no_machine">No. Machine *</label>
-                                                <input class="form-control" id="no_machine" name="no_machine" type="text" placeholder="Enter no. machine" value="" required />
+                                                <input class="form-control" id="no_machine" name="no_machine" type="text" placeholder="Enter no. machine" value="{{ form.no_machine.value }}" required />
                                             </div>
                                             <div class="mb-3">
                                                 <label class="small mb-1" for="description">Description</label>
-                                                <textarea class="lh-base form-control" name="description" type="text" placeholder="Enter decription machine" rows="4"></textarea>
+                                                <textarea class="lh-base form-control" name="description" type="text" placeholder="Enter decription machine" rows="4">{{ form.description.value }}</textarea>
                                             </div>
-                                            <button class="btn btn-primary" type="submit">Register</button>
+                                            <button class="btn btn-primary" type="submit">Update</button>
                                         </form>
                                     </div>
                                 </div>
@@ -70,14 +70,14 @@
                         </div>
                     </div>
                 </main>
-
+               
                 {% block footer %}
                     {% include "base/footer.html" %}
                 {% endblock footer %}
 
             </div>
         </div>
-
+        
         {% block javascript %}
             {% include "base/javascript.html" %}
         {% endblock javascript %}
