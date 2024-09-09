@@ -7,7 +7,7 @@ class Mesin(models.Model):
     is_active = models.BooleanField(default=True)  # Status mesin
     status = models.CharField(
         max_length=50,
-        default='standby'  # Set a default status if necessary
+        default='ready'  # Set a default status if necessary
     )
 
 

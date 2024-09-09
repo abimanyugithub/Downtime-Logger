@@ -29,12 +29,11 @@
                 </a>
                 <div class="collapse" id="collapseDashboards" data-bs-parent="#accordionSidenav">
                     <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                        <a class="nav-link" href="{% url 'dashboard_mesin_blow' %}">
-                            Blow
+                        {% for option in cp_kategori_mesin %}
+                        <a class="nav-link" href="{% url 'view_dashboard' %}?category={{ option.value }}">
+                            {{ option.value }}
                         </a>
-                        <a class="nav-link" href="{% url 'dashboard_mesin_injection' %}">
-                            Injection
-                        </a>
+                        {% endfor %}
                     </nav>
                 </div>
                 

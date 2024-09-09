@@ -18,3 +18,22 @@
         });
     });
 </script>
+
+<script type="text/javascript">
+    function formatTime(seconds) {
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds % 3600) / 60);
+        let secs = seconds % 60;
+
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startTimer(initialSeconds) {
+        let currentSeconds = initialSeconds;
+
+        setInterval(function() {
+            $('#downtime-display').text(formatTime(currentSeconds));
+            currentSeconds += 1;  // Increment by 1 second
+        }, 1000);
+    }
+</script>

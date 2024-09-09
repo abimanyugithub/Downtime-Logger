@@ -7,21 +7,26 @@ from .models import Mesin, DowntimeMesin, DowntimeRole
 from django.middleware.csrf import get_token
 
 
-kategori_mesin =  [{'value': 'blow', 'label': 'Blow Molding Machine'}, {'value': 'injection', 'label': 'Injection Molding Machine'}]
-first_roles = [{'value': 'leader', 'label': 'Production Leader'}]
-roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'maintenance', 'label': 'Maintenance Department'}, {'value': 'mold', 'label': 'Mold Division'}]
+dict_category_machine =  [{'value': 'blow', 'label': 'Blow Molding Machine'}, {'value': 'injection', 'label': 'Injection Molding Machine'}]
+dict_first_roles = [{'value': 'leader', 'label': 'Production Leader'}]
+dict_roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'maintenance', 'label': 'Maintenance Department'}, {'value': 'mold', 'label': 'Mold Division'}]
 
 
-class Dashboard(TemplateView):
+class Index(TemplateView):
     template_name = 'base/index.html'
 
+class Dashboard(TemplateView):
+    template_name = 'base/dashboard.html'
 
-class DashboardInjection(TemplateView):
-    template_name = 'base/dashboard-injection.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        kategori_mesin = self.request.GET.get('category')
 
-
-class DashboardBlow(TemplateView):
-    template_name = 'base/dashboard-blow.html'
+        # using dict.get() with a temporary dictionary
+        temp_dict = {k['value']: k for k in dict_category_machine}
+        selected_category = temp_dict.get(kategori_mesin)
+        context['kategori_mesin'] = selected_category
+        return context
 
 class ListMesin(ListView):
     template_name = 'crud_mesin/list_machines.html'
@@ -38,10 +43,10 @@ class RegisterMesin(CreateView):
 
     def form_valid(self, form):
         # Retrieve the form data
-        category_machine = form.cleaned_data.get('category_machine')
+        kategori_mesin = form.cleaned_data.get('category_machine')
         no_machine = form.cleaned_data.get('no_machine')
 
-        if Mesin.objects.filter(category_machine=category_machine, no_machine=no_machine).exists():
+        if Mesin.objects.filter(category_machine=kategori_mesin, no_machine=no_machine).exists():
             return redirect(self.request.META.get('HTTP_REFERER'))
         
         # Perform any other operations you need before saving
@@ -52,7 +57,7 @@ class RegisterMesin(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['kategori_mesin'] = kategori_mesin
+        context['kategori_mesin'] = dict_category_machine
         return context
 
 
@@ -64,23 +69,23 @@ class UpdateMesin(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['kategori_mesin'] = kategori_mesin
+        context['kategori_mesin'] = dict_category_machine
         return context
 
-
-def AsyncMesin(request):
+'''def AsyncMesin(request):
     list_mesin = Mesin.objects.all()
-    return render(request, 'partial/mesin-partial.html', {'list_mesin': list_mesin})
+    return render(request, 'partial/mesin-partial.html', {'list_mesin': list_mesin})'''
 
-def AsyncMesinBlowCard(request):
-    list_mesin = Mesin.objects.filter(category_machine='blow').order_by('no_machine')
+def AsyncMesinCard(request):
+    kategori_mesin = request.GET.get('category')
+    list_mesin = Mesin.objects.filter(category_machine=kategori_mesin).order_by('no_machine')
 
     # Prepare list mesin dengan beberapa komponen "color"
     mesin_card_color = []
 
     # Determine color for each machine's status
     for data in list_mesin:
-        if data.is_active and data.status == "standby":
+        if data.is_active and data.status == "ready":
             bg_color = 'bg-teal'
 
         elif ((data.is_active) and (data.status == "maintain" or data.status == "pending")):
@@ -95,45 +100,21 @@ def AsyncMesinBlowCard(request):
             'bg_color': bg_color
         })
 
-    return render(request, 'partial/mesin-partial-card-blw.html', {'list_mesin': mesin_card_color})
-
-def AsyncMesinInjectionCard(request):
-    list_mesin = Mesin.objects.filter(category_machine='injection').order_by('no_machine')
-
-    # Prepare list mesin dengan beberapa komponen "color"
-    mesin_card_color = []
-
-    # Determine color for each machine's status
-    for data in list_mesin:
-        if data.is_active and data.status == "standby":
-            bg_color = 'bg-teal'
-
-        elif ((data.is_active) and (data.status == "maintain" or data.status == "pending")):
-            bg_color = 'bg-warning'
-        else:
-            bg_color = 'bg-gray-200'
-        
-        # Append machine and its background color to the list
-        mesin_card_color.append({
-            'data': data,
-            'bg_color': bg_color
-        })
-
-    return render(request, 'partial/mesin-partial-card-inj.html', {'list_mesin': mesin_card_color})
+    return render(request, 'partial/mesin-partial-card.html', {'list_mesin': mesin_card_color})
 
 
 class UpdateStatusMesin(View):
 
     def post(self, request, pk):
-        statusmesin = get_object_or_404(Mesin, pk=pk)
+        status_mesin = get_object_or_404(Mesin, pk=pk)
 
-        if statusmesin.is_active:
-            statusmesin.is_active = False
-            statusmesin.status = "off"
+        if status_mesin.is_active:
+            status_mesin.is_active = False
+            status_mesin.status = "off"
         else:
-            statusmesin.is_active = True
-            statusmesin.status = "standby"
-        statusmesin.save() # Update the boolean field to False
+            status_mesin.is_active = True
+            status_mesin.status = "ready"
+        status_mesin.save() # Update the boolean field to False
 
         # return redirect(reverse('list_mesin'))
         return redirect(self.request.META.get('HTTP_REFERER'))
@@ -158,7 +139,7 @@ class DisplayAndon(TemplateView):
                 return redirect(self.request.META.get('HTTP_REFERER'))
                 
         else:
-            return redirect(reverse('view_dashboard'))
+            return redirect(reverse('view_index'))
             
         return super().dispatch(request, *args, **kwargs)
 
@@ -170,19 +151,22 @@ class DisplayAndon(TemplateView):
 
         try:
 
-            # status "standby" atau "pending" enable tombol leader, disable lainnya
-            all_roles = first_roles + roles
-            context['roles'] = all_roles
-            if ((mesin.status == 'standby')):
-                context['disabled_roles'] = {role['value'] for role in roles}
+            # status "ready" atau "pending" enable tombol leader, disable lainnya
+            combined_roles = dict_first_roles + dict_roles
+            context['roles'] = combined_roles
+            if ((mesin.status == 'ready')):
+                context['disabled_roles'] = {role['value'] for role in dict_roles}
+                context['status'] = mesin.status
 
             # status "repair" atau "off" enable tombol leader, disable lainnya
             elif ((mesin.status == 'maintain') or (mesin.status == 'off')):
-                context['disabled_roles'] = {role['value'] for role in first_roles}
+                context['disabled_roles'] = {role['value'] for role in dict_first_roles}
+                context['status'] = mesin.status
 
-            # status "repair" atau "off" enable tombol leader, disable lainnya
+            # status "pending" disable all
             elif (mesin.status == 'pending'):
-                context['disabled_roles'] = {role['value'] for role in all_roles}
+                context['disabled_roles'] = {role['value'] for role in combined_roles}
+                context['status'] = mesin.status
 
         except Mesin.DoesNotExist:
             # Handle the case where the Mesin does not exist
@@ -246,6 +230,14 @@ class DisplayAndon(TemplateView):
             # tampilkan list role jika status mesin "maintain/pending"
             if ((mesin.status == 'maintain') or (mesin.status == 'pending')):
                 context['multicontext_roles'] = multicontext_roles
+
+                downtime = timezone.now() - downtime_mesin.start_time
+                downtime_seconds = int(downtime.total_seconds())
+                hours, remainder = divmod(downtime_seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                formatted_downtime = f"{hours:02}:{minutes:02}:{seconds:02}"
+
+                context['downtime_rundown'] = formatted_downtime
                 
 
             # tampilkan tombol finish jika semua status role "done" dan status mesin "maintain"
@@ -263,13 +255,8 @@ class DisplayAndon(TemplateView):
             # Handle the case where the DowntimeRole does not exist
             print("The specified DowntimeRole does not exist.")
 
-        context['nmr_mesin'] = nmr_mesin
-        context['kategori_mesin'] = kategori_mesin
-
-        if kategori_mesin == "blow":
-            context['url'] = reverse('dashboard_mesin_blow')
-        else:
-            context['url'] = reverse('dashboard_mesin_injection')
+        context['nmr_mesin'] = mesin.no_machine
+        context['kategori_mesin'] = mesin.category_machine
 
         return context
     
@@ -285,7 +272,7 @@ class StatusDowntimeMesin(View):
             mesin = Mesin.objects.get(no_machine=nmr_mesin, category_machine=kategori_mesin)
             downtime_instance = DowntimeMesin.objects.filter(machine__no_machine=mesin.no_machine, machine__category_machine=mesin.category_machine).order_by('-start_time').first()
 
-            if mesin.status == 'standby' and any(r['value'] == role for r in first_roles):
+            if mesin.status == 'ready' and any(r['value'] == role for r in dict_first_roles):
                 mesin.status = 'pending'
                 mesin.save()
 
@@ -306,7 +293,7 @@ class StatusDowntimeMesin(View):
                     )
 
             # create downtime role jika bukan "leader"
-            elif mesin.status == 'maintain' and any(r['value'] == role for r in roles):
+            elif mesin.status == 'maintain' and any(r['value'] == role for r in dict_roles):
 
                 # cek jika role sudah ada di id downtime tersebut
                 if DowntimeRole.objects.filter(downtime=downtime_instance, role=role).exists():
@@ -324,7 +311,7 @@ class StatusDowntimeMesin(View):
                 downtime_instance.end_time = timezone.now()
                 downtime_instance.save()
 
-                mesin.status = 'standby'
+                mesin.status = 'ready'
                 mesin.save()
 
         except Mesin.DoesNotExist:
@@ -367,9 +354,9 @@ class DeleteDowntimeRole(View):
         mesin = Mesin.objects.get(no_machine=nmr_mesin, category_machine=kategori_mesin)
         downtime_instance = DowntimeMesin.objects.filter(machine__no_machine=mesin.no_machine, machine__category_machine=mesin.category_machine).order_by('-start_time').first()
 
-        # kembali ke "standby" jika batal panggil leader 
-        if mesin and any(r['value'] == role_instance_update.role for r in first_roles):
-            mesin.status = 'standby'
+        # kembali ke "ready" jika batal panggil leader 
+        if mesin and any(r['value'] == role_instance_update.role for r in dict_first_roles):
+            mesin.status = 'ready'
             mesin.save()
 
             # hapus "downtime" & "role"
@@ -377,7 +364,7 @@ class DeleteDowntimeRole(View):
             role_instance_update.delete()
 
         # jika others
-        elif mesin and any(r['value'] == role_instance_update.role for r in roles):
+        elif mesin and any(r['value'] == role_instance_update.role for r in dict_roles):
             role_instance_update.delete()
 
         return redirect(self.request.META.get('HTTP_REFERER'))
@@ -385,45 +372,23 @@ class DeleteDowntimeRole(View):
 
 def ControlTrigger(request):
 
-    if DowntimeRole.objects.filter(role="leader", status="waiting").exists():
-        data = {
-            "status": "success",
-            "message": "waiting",
-            "role": "leader"
-        }
+    # Combine the two lists
+    combined_roles = dict_first_roles + dict_roles
 
-    elif DowntimeRole.objects.filter(role="setter", status="waiting").exists():
-        data = {
-            "status": "success",
-            "message": "waiting",
-            "role": "setter"
-        }
-
-    elif DowntimeRole.objects.filter(role="maintenance", status="waiting").exists():
-        data = {
-            "status": "success",
-            "message": "waiting",
-            "role": "maintenance"
-        }
-
-    elif DowntimeRole.objects.filter(role="mold", status="waiting").exists():
-        data = {
-            "status": "success",
-            "message": "waiting",
-            "role": "mold"
-        }
-
+    # Loop through the combined roles to find the first matching role
+    for role in combined_roles:
+        if DowntimeRole.objects.filter(role=role['value'], status="waiting").exists():
+            data = {
+                "status": "success",
+                "message": "waiting",
+                "role": role['value']
+            }
+            break
     else:
         data = {
             "status": "success",
             "message": "waiting",
             "role": "no_role"
         }
-    return JsonResponse(data)
-    
-    '''data = {
-        "status": "success",
-        "message": "hello"
-    }
 
-    return JsonResponse(data)'''
+    return JsonResponse(data)

@@ -8,10 +8,34 @@
         <div id="layoutAuthentication">
             <div id="layoutAuthentication_content">
                 <main>
-                    <div class="container-xl px-4">
-                        <div class="text-center my-5">
-                            <h1 class="text-white mb-2 display-6 fw-bold">MACHINE {{ nmr_mesin }}</h1><hr class="text-white">
-                            <h1 class="text-white mb-2 display-6 fw-bold">{{ kategori_mesin|upper }}</h1>
+                    <div class="container-xl ">
+                        <div class="card shadow-lg rounded-lg mt-2 mb-2">
+                            <div class="card-body sbp-preview">
+                                <div class="row ">
+                                    <div class="col-md-3 border border-blue d-flex justify-content-center align-items-center">
+                                        <div class="text-center my-4">
+                                            <h1 class="mb-2 display-1 fw-bold">{{ nmr_mesin }}</h1>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 border border-blue">
+                                        <div class="row h-50 d-flex justify-content-center align-items-center border">
+                                            <div class="text-center">
+                                                <h1 class="mb-2 display-6 fw-bold">MACHINE {{ kategori_mesin|upper }}</h1>
+                                            </div>
+                                        </div>
+                                        <div class="row h-50 d-flex justify-content-center align-items-center border">
+                                            <div class="text-center">
+                                                <h1 class="mb-2 display-6 fw-bold">{% if downtime_rundown %}{{ downtime_rundown }}{% else %}{{ status|upper }}{% endif %}</h1>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 border border-blue d-flex justify-content-center align-items-center">
+                                        <div class="text-center my-5">
+                                            <h1 class="mb-2 display-1 fw-bold mx-auto">{{ nmr_mesin }}</h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="row justify-content-center">
                             <div class="col-lg-6">
@@ -81,7 +105,7 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-6">
                                 <div class="text-center mt-4">
-                                    <a class="text-arrow-icon text-white" href="{{ url }}">
+                                    <a class="text-arrow-icon text-white" href="{% url 'view_dashboard' %}?category={{ kategori_mesin }}">
                                         <i class="ms-0 me-1" data-feather="arrow-left"></i>
                                         Return to Dashboard
                                     </a>
