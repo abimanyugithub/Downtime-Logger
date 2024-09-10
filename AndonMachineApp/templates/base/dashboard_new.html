@@ -24,7 +24,7 @@
                                     <div class="col-auto mt-4">
                                         <h1 class="page-header-title">
                                             <div class="page-header-icon"><i data-feather="activity"></i></div>
-                                            Dashboard {{ kategori_mesin.label|capfirst }}
+                                            Dashboard_2  {{ test }} {{ kategori_mesin.label|capfirst }}
                                         </h1>
                                         <div class="page-header-subtitle">Dashboard overview list of {{ kategori_mesin.value }} machine(s)</div>
                                     </div>
@@ -32,27 +32,14 @@
                             </div>
                         </div>
                     </header>
-                    <!-- Main page content-->
-                    <div class="container-xl px-4 mt-n10">
-                        <h4 class="mb-0 mt-5 text-white">Select Roles</h4>
-                        <hr class="mt-2 mb-4 text-white" />
-                        <div class="row">
-                        {% for role in roles %}
-                        <div class="col-6">
-                            <a class="card card-icon lift lift-sm mb-4" href="{% url 'view_dashboard_new' %}?category={{ kategori_mesin.value }}&role={{ role.value }}">
-                                <div class="row g-0">
-                                    <div class="col-3 card-icon-aside bg-secondary"><i class="text-white-50" data-feather="users"></i></div>
-                                    <div class="col">
-                                        <div class="card-body py-5">
-                                            <h5 class="card-title text-secondary mb-2">{{ role.value|upper }}</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        {% endfor %}
+
+                    <div class="container-xl px-4 mt-n10">                  
+                        <!-- Example Colored Cards for Dashboard Demo-->
+                        <div class="row" hx-get="{% url 'async_card' %}?category={{ kategori_mesin.value }}" hx-trigger="load, every 2s">
+                            
                         </div>
                     </div>
+                    {{ list_mesin }}
                     
                 </main>
 

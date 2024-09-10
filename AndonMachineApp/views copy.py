@@ -34,19 +34,6 @@ class Dashboard(TemplateView):
         context['roles'] = sorted_combined_roles
         return context
     
-    
-class DashboardNew(TemplateView):
-    template_name = 'base/dashboard_new.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        kategori_mesin = self.request.GET.get('category')
-
-        # using dict.get() with a temporary dictionary
-        temp_dict = {k['value']: k for k in dict_category_machine}
-        selected_category = temp_dict.get(kategori_mesin)
-        context['kategori_mesin'] = selected_category
-        return context
 
 class ListMesin(ListView):
     template_name = 'crud_mesin/list_machines.html'
@@ -100,33 +87,32 @@ def AsyncMesinCard(request):
     kategori_mesin = request.GET.get('category')
     get_role = request.GET.get('role')
     
-    # Check for downtime related to the given role for the current machine
-    # downtime_exists = DowntimeRole.objects.filter(status="waiting", role=get_role)
-
-    # Ensure get_role is not None before performing the query
-    '''if kategori_mesin and get_role:
-        downtime_exists = DowntimeRole.objects.filter(status="waiting", role=get_role)
+    if kategori_mesin:
+        list_mesin = Mesin.objects.filter(category_machine=kategori_mesin).order_by('no_machine')
     else:
-        # Handle the case where 'role' is not provided or is None
-        downtime_exists = DowntimeRole.objects.filter(status="waiting")
-
-    # Determine color based on whether downtime exists
-    if downtime_exists:
-        bg_color = 'bg-teal'  # Example color if downtime exists
-    else:
-        bg_color = 'bg-teal'  # Example color if no downtime
+        list_mesin = Mesin.objects.all().order_by('category_machine', 'no_machine')
 
     # Prepare list mesin dengan beberapa komponen "color"
     mesin_card_color = []
-    # Append machine with its color
-    mesin_card_color.append({
-        'bg_color': bg_color
-    })'''
 
-    downtime_exists = DowntimeRole.objects.filter(status="waiting", role=get_role)
+    # Determine color for each machine's status
+    for data in list_mesin:
+        if data.is_active and data.status == "ready":
+            bg_color = 'bg-teal'
 
+        elif ((data.is_active) and (data.status == "maintain" or data.status == "pending")):
+            bg_color = 'bg-warning'
+        
+        else:
+            bg_color = 'bg-gray-200'
+        
+        # Append machine and its background color to the list
+        mesin_card_color.append({
+            'data': data,
+            'bg_color': bg_color
+        })
 
-    return render(request, 'partial/mesin-partial-card.html', {'list_mesin': downtime_exists})
+    return render(request, 'partial/mesin-partial-card.html', {'list_mesin': mesin_card_color})
 
 
 class UpdateStatusMesin(View):
