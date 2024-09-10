@@ -14,7 +14,7 @@
                                 <div class="row ">
                                     <div class="col-md-3 border border-blue d-flex justify-content-center align-items-center">
                                         <div class="text-center my-4">
-                                            <h1 class="mb-2 display-1 fw-bold">{{ nmr_mesin }}</h1>
+                                            <h1 class="mb-2 display-1 fw-bold"><img src="{% static 'images/login_image.png' %}" alt="logo" class="w-100" ></h1>
                                         </div>
                                     </div>
                                     <div class="col-md-6 border border-blue">
@@ -23,9 +23,15 @@
                                                 <h1 class="mb-2 display-6 fw-bold">MACHINE {{ kategori_mesin|upper }}</h1>
                                             </div>
                                         </div>
-                                        <div class="row h-50 d-flex justify-content-center align-items-center border">
+                                        <div class="row {{ bg_status }} h-50 d-flex justify-content-center align-items-center border">
                                             <div class="text-center">
-                                                <h1 class="mb-2 display-6 fw-bold">{% if downtime_rundown %}{{ downtime_rundown }}{% else %}{{ status|upper }}{% endif %}</h1>
+                                                <h1 class="mb-2 display-6 fw-bold">
+                                                    {% if start_time %}
+                                                        <span id="elapsed-time"></span>
+                                                    {% else %}
+                                                        {{ status|upper }}
+                                                    {% endif %}
+                                                </h1>
                                             </div>
                                         </div>
                                     </div>
@@ -73,8 +79,8 @@
                                                     <div class="col-auto card-icon-aside {{ dt_role.btn_color }}"><i class="me-1 text-white-50 fa {{  dt_role.icon }}"></i></div>
                                                     <div class="col">
                                                         <div class="card-body">
-                                                            <h3 class="card-title">{{ dt_role.data.role|upper }}</h3>
-                                                            <p class="card-text">{{ dt_role.data.status }}</p>
+                                                            <h3 class="card-title">{{ dt_role.data.role|upper }}</h3><hr>
+                                                            <p class="card-text">Status: <b>{{ dt_role.data.status|capfirst }}</b></p>
                                                             {% block modal_dt_role %}
                                                                 {% include "./modal/modal-status-role.html" %}
                                                             {% endblock modal_dt_role %}

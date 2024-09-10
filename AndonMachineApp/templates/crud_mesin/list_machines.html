@@ -23,7 +23,7 @@
                                     <div class="col-auto mb-3">
                                         <h1 class="page-header-title">
                                             <div class="page-header-icon"><i data-feather="list"></i></div>
-                                            Machines List
+                                            Machines list
                                         </h1>
                                     </div>
                                     <div class="col-12 col-xl-auto mb-3">
@@ -53,7 +53,7 @@
                                     <tbody>
                                         {% for mesin in list_mesin %}
                                         <tr>
-                                            <td>{{ mesin.category_machine }}</td>
+                                            <td>{{ mesin.category_machine|capfirst }}</td>
                                             <td>{{ mesin.no_machine }}</td>
                                             <td>{{ mesin.description }}</td>
                                             <td><div class="badge {% if mesin.is_active %}bg-green-soft text-green{% else %}bg-yellow-soft text-yellow{% endif %}">{{ mesin.is_active }}</div></td>

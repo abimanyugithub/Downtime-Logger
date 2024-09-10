@@ -3,7 +3,7 @@
   <div class="modal-dialog" role="document">
       <div class="modal-content">
           <div class="modal-header">
-              <h5 class="modal-title" id="staticBackdropLabel">{{ title }} {{ dt_role.data.role|capfirst }}</h5>
+              <h5 class="modal-title" id="staticBackdropLabel">{{ dt_role.title }}</h5>
               <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -12,9 +12,9 @@
                       <div class="col-auto card-icon-aside {{ dt_role.btn_color2 }}"><i class="me-1 text-white-50 fa {{ dt_role.icon2 }}"></i></div>
                       <div class="col">
                           <div class="card-body py-5">
-                              <h5 class="card-title">{{ status }}</h5>
+                            <h5 class="card-title"><b>{{ dt_role.data.role|capfirst }}</b></h5>
                               <p class="card-text">
-                                <b>{{ dt_role.data.role|capfirst }}</b> {{ dt_role.message }} 
+                                {{ dt_role.message|safe }} 
                               </p>
                           </div>
                       </div>
@@ -39,7 +39,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel">{{ dt_role.data.role|capfirst }}</h5>
+                <h5 class="modal-title" id="staticBackdropLabel">Cancel</h5>
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -48,9 +48,9 @@
                         <div class="col-auto card-icon-aside bg-blue"><i class="me-1 text-white-50 fa fa-reply"></i></div>
                         <div class="col">
                             <div class="card-body py-5">
-                                <h5 class="card-title">{{ status }}</h5>
+                                {% comment %}<h5 class="card-title"><b>{{ dt_role.data.role|capfirst }}</b></h5>{% endcomment %}
                                 <p class="card-text">
-                                    Batal panggil <b>{{ dt_role.data.role|capfirst }}</b>
+                                    You chose to cancel the request to the <b>{{ dt_role.data.role|capfirst }}</b>.
                                 </p>
                             </div>
                         </div>

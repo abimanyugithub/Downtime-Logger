@@ -1,0 +1,98 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+    {% block header %}
+        {% include "base/header.html" %}
+    {% endblock header %}
+    <body class="nav-fixed">
+
+        {% block topnav %}
+            {% include "base/topnav.html" %}
+        {% endblock topnav %}
+
+        <div id="layoutSidenav">
+            {% block sidebar %}
+                {% include "base/sidebar.html" %}
+            {% endblock sidebar %}
+            <div id="layoutSidenav_content">
+                <main>
+                    <header class="page-header page-header-compact page-header-light border-bottom bg-white mb-4">
+                        <div class="container-fluid px-4">
+                            <div class="page-header-content">
+                                <div class="row align-items-center justify-content-between pt-3">
+                                    <div class="col-auto mb-3">
+                                        <h1 class="page-header-title">
+                                            <div class="page-header-icon"><i data-feather="list"></i></div>
+                                            Downtime Machines List
+                                        </h1>
+                                    </div>
+                                    <div class="col-12 col-xl-auto mb-3">
+                                        <a class="btn btn-sm btn-light text-primary" href="user-management-groups-list.html">
+                                            <i class="me-1" data-feather="users"></i>
+                                            Manage Groups
+                                        </a>
+                                        <a class="btn btn-sm btn-light text-primary" href="user-management-add-user.html">
+                                            <i class="me-1" data-feather="user-plus"></i>
+                                            Add New User
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    <!-- Main page content-->
+                    <div class="container-fluid px-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <table class="custom-table-hover" id="datatablesSimple">
+                                    <thead>
+                                        <tr>
+                                            <th>Machine</th>
+                                            <th>Start Downtime</th>
+                                            <th>End Downtime</th>
+                                            <th>Duration</th>
+                                            <th>Role(s)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for downtime in list_downtime_mesin %}
+                                        <tr>
+                                            <td>{{ downtime.machine.category_machine|capfirst }} {{ downtime.machine.no_machine }}</td>
+                                            <td>{{ downtime.start_time|date:"d-m-Y h:m:s"  }}</td>
+                                            <td>{{ downtime.end_time|date:"d-m-Y h:m:s" }}</td>
+                                            <td>{{ downtime.duration|format_duration }}</td>
+                                            <td>{% for dt_role in downtime_roles %}
+                                                {% if dt_role.data.downtime.id == downtime.id %}
+                                                <span class="badge {{ dt_role.badges }}">{{ dt_role.data.role }}</span>
+                                                {% endif %}
+                                            {% endfor %}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <footer class="footer-admin mt-auto footer-light">
+                    <div class="container-xl px-4">
+                        <div class="row">
+                            <div class="col-md-6 small">Copyright &copy; Your Website 2021</div>
+                            <div class="col-md-6 text-md-end small">
+                                <a href="#!">Privacy Policy</a>
+                                &middot;
+                                <a href="#!">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        
+        {% block javascript %}
+            {% include "base/javascript.html" %}
+        {% endblock javascript %}
+
+    </body>
+</html>

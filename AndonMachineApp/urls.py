@@ -16,6 +16,8 @@ urlpatterns = [
     path('downtime/role/<str:pk>/', views.StatusDowntimeRole.as_view(), name='status_downtime_role'),
     path('downtime/role/delete/<str:pk>/', views.DeleteDowntimeRole.as_view(), name='delete_downtime_role'),
 
+    path('downtime/mesin/list/', views.ListDowntimeMesin.as_view(), name='list_downtime_mesin'),
+
     # trigger andon esp32
     path('andon/esp32-response/', views.ControlTrigger, name='control_trigger'),
 

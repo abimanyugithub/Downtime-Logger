@@ -14,6 +14,7 @@ dict_roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'maintenance', 
 
 class Index(TemplateView):
     template_name = 'base/index.html'
+    
 
 class Dashboard(TemplateView):
     template_name = 'base/dashboard.html'
@@ -26,7 +27,9 @@ class Dashboard(TemplateView):
         temp_dict = {k['value']: k for k in dict_category_machine}
         selected_category = temp_dict.get(kategori_mesin)
         context['kategori_mesin'] = selected_category
+        context['roles'] = dict_first_roles + dict_roles
         return context
+    
 
 class ListMesin(ListView):
     template_name = 'crud_mesin/list_machines.html'
@@ -78,7 +81,12 @@ class UpdateMesin(UpdateView):
 
 def AsyncMesinCard(request):
     kategori_mesin = request.GET.get('category')
-    list_mesin = Mesin.objects.filter(category_machine=kategori_mesin).order_by('no_machine')
+    
+
+    if kategori_mesin:
+        list_mesin = Mesin.objects.filter(category_machine=kategori_mesin).order_by('no_machine')
+    else:
+        list_mesin = Mesin.objects.all().order_by('category_machine', 'no_machine')
 
     # Prepare list mesin dengan beberapa komponen "color"
     mesin_card_color = []
@@ -157,6 +165,7 @@ class DisplayAndon(TemplateView):
             if ((mesin.status == 'ready')):
                 context['disabled_roles'] = {role['value'] for role in dict_roles}
                 context['status'] = mesin.status
+                context['bg_status'] = 'bg-teal'
 
             # status "repair" atau "off" enable tombol leader, disable lainnya
             elif ((mesin.status == 'maintain') or (mesin.status == 'off')):
@@ -191,7 +200,9 @@ class DisplayAndon(TemplateView):
                     disable_btn2 = ''
                     btn_color3 = 'bg-blue'
                     disable_btn = ''
-                    message = 'ambil tugas ini'
+                    message = f'You are going to do this now.'
+                    title = 'Commit'
+
 
                 elif data.status == "done":
                     btn_color = 'bg-teal'
@@ -202,6 +213,7 @@ class DisplayAndon(TemplateView):
                     btn_color3 = 'bg-pink'
                     disable_btn = 'disabled'
                     message = ''
+                    title = ''
 
                 else:
                     btn_color = 'bg-orange'
@@ -211,7 +223,9 @@ class DisplayAndon(TemplateView):
                     disable_btn2 = 'disabled'
                     btn_color3 = 'bg-pink'
                     disable_btn = ''
-                    message = 'selesai perbaikan'
+                    message = f'Has the repair been completed?'
+                    title = 'Completion'
+
 
                 
                 # Append role and color to the list
@@ -224,20 +238,24 @@ class DisplayAndon(TemplateView):
                     'disable_btn2': disable_btn2,
                     'btn_color3': btn_color3,
                     'disable_btn': disable_btn,
-                    'message': message
+                    'message': message,
+                    'title': title
                 })
 
             # tampilkan list role jika status mesin "maintain/pending"
             if ((mesin.status == 'maintain') or (mesin.status == 'pending')):
                 context['multicontext_roles'] = multicontext_roles
 
-                downtime = timezone.now() - downtime_mesin.start_time
+                '''downtime = timezone.now() - downtime_mesin.start_time
                 downtime_seconds = int(downtime.total_seconds())
                 hours, remainder = divmod(downtime_seconds, 3600)
                 minutes, seconds = divmod(remainder, 60)
                 formatted_downtime = f"{hours:02}:{minutes:02}:{seconds:02}"
 
-                context['downtime_rundown'] = formatted_downtime
+                context['downtime_rundown'] = formatted_downtime'''
+
+                context['start_time'] = downtime_mesin.start_time
+                context['bg_status'] = 'bg-warning'
                 
 
             # tampilkan tombol finish jika semua status role "done" dan status mesin "maintain"
@@ -369,26 +387,56 @@ class DeleteDowntimeRole(View):
 
         return redirect(self.request.META.get('HTTP_REFERER'))
     
+class ListDowntimeMesin(ListView):
+    template_name = 'report/list_downtime_mesin.html'
+    model = DowntimeMesin
+    context_object_name = 'list_downtime_mesin'
+    ordering = ['-start_time']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ddr = DowntimeRole.objects.all()
+
+        downtime_roles = []
+        for data in ddr:
+            if data.role == "mold":
+                badges = 'bg-blue-soft text-blue'
+            elif data.role == "maintenance":
+                badges = 'bg-purple-soft text-purple'
+            elif data.role == "leader":
+                badges = 'bg-green-soft text-green'
+            elif data.role == "setter":
+                badges = 'bg-yellow-soft text-yellow'
+
+            # Append role and color to the list
+            downtime_roles.append({
+                'data': data,
+                'badges': badges
+            })
+
+        context['downtime_roles'] = downtime_roles
+        return context
+    
 
 def ControlTrigger(request):
 
     # Combine the two lists
     combined_roles = dict_first_roles + dict_roles
 
-    # Loop through the combined roles to find the first matching role
-    for role in combined_roles:
-        if DowntimeRole.objects.filter(role=role['value'], status="waiting").exists():
-            data = {
-                "status": "success",
-                "message": "waiting",
-                "role": role['value']
-            }
-            break
-    else:
-        data = {
-            "status": "success",
-            "message": "waiting",
-            "role": "no_role"
-        }
+    # Create a set of all possible role values (for validation if needed)
+    role_values = {role['value'] for role in combined_roles}
+
+    # Fetch all roles with status "waiting" from the database
+    waiting_roles_values = DowntimeRole.objects.filter(status="waiting").values_list('role', flat=True).distinct()
+
+    # Filter waiting roles to only include those present in the combined roles
+    valid_waiting_roles = [role for role in waiting_roles_values if role in role_values]
+
+    # Define the response data
+    data = {
+        "status": "success",
+        "message": "waiting",
+        "roles": valid_waiting_roles if valid_waiting_roles else ["no_role"]
+    }
 
     return JsonResponse(data)

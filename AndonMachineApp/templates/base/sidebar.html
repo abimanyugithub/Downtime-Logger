@@ -29,9 +29,12 @@
                 </a>
                 <div class="collapse" id="collapseDashboards" data-bs-parent="#accordionSidenav">
                     <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
+                        <a class="nav-link" href="{% url 'view_dashboard' %}">
+                            All
+                        </a>
                         {% for option in cp_kategori_mesin %}
                         <a class="nav-link" href="{% url 'view_dashboard' %}?category={{ option.value }}">
-                            {{ option.value }}
+                            {{ option.value|capfirst }}
                         </a>
                         {% endfor %}
                     </nav>
@@ -49,6 +52,21 @@
                 <div class="collapse" id="collapseComponents" data-bs-parent="#accordionSidenav">
                     <nav class="sidenav-menu-nested nav">
                         <a class="nav-link" href="{% url 'list_mesin' %}">Machines</a>
+                    </nav>
+                </div>
+
+                <!-- Sidenav Heading (UI Toolkit)-->
+                <div class="sidenav-menu-heading">Report</div>
+            
+                <!-- Sidenav Accordion (Components)-->
+                <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseComponents">
+                    <div class="nav-link-icon"><i data-feather="clock"></i></div>
+                    Downtime
+                    <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                </a>
+                <div class="collapse" id="collapseReports" data-bs-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link" href="{% url 'list_downtime_mesin' %}">Downtime Machines</a>
                     </nav>
                 </div>
                 
