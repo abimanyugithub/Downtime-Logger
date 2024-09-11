@@ -29,12 +29,12 @@
                 </a>
                 <div class="collapse" id="collapseDashboards" data-bs-parent="#accordionSidenav">
                     <nav class="sidenav-menu-nested nav accordion" id="accordionSidenavPages">
-                        <a class="nav-link" href="{% url 'view_dashboard' %}">
+                        <a class="nav-link" href="{% url 'view_dashboard' %}?category=all">
                             All
                         </a>
-                        {% for option in cp_kategori_mesin %}
-                        <a class="nav-link" href="{% url 'view_dashboard' %}?category={{ option.value }}">
-                            {{ option.value|capfirst }}
+                        {% for kategori_mesin in cp_kategori_mesin %}
+                        <a class="nav-link" href="{% url 'view_dashboard' %}?category={{ kategori_mesin.value }}">
+                            {{ kategori_mesin.value|capfirst }}
                         </a>
                         {% endfor %}
                     </nav>
@@ -73,11 +73,11 @@
             </div>
         </div>
         <!-- Sidenav Footer-->
-        <div class="sidenav-footer">
+        <!-- <div class="sidenav-footer">
             <div class="sidenav-footer-content">
                 <div class="sidenav-footer-subtitle">Logged in as:</div>
                 <div class="sidenav-footer-title">Valerie Luna</div>
             </div>
-        </div>
+        </div> -->
     </nav>
 </div>

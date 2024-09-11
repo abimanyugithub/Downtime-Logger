@@ -27,16 +27,6 @@
                                             Downtime Machines List
                                         </h1>
                                     </div>
-                                    <div class="col-12 col-xl-auto mb-3">
-                                        <a class="btn btn-sm btn-light text-primary" href="user-management-groups-list.html">
-                                            <i class="me-1" data-feather="users"></i>
-                                            Manage Groups
-                                        </a>
-                                        <a class="btn btn-sm btn-light text-primary" href="user-management-add-user.html">
-                                            <i class="me-1" data-feather="user-plus"></i>
-                                            Add New User
-                                        </a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -59,8 +49,8 @@
                                         {% for downtime in list_downtime_mesin %}
                                         <tr>
                                             <td>{{ downtime.machine.category_machine|capfirst }} {{ downtime.machine.no_machine }}</td>
-                                            <td>{{ downtime.start_time|date:"d-m-Y h:m:s"  }}</td>
-                                            <td>{{ downtime.end_time|date:"d-m-Y h:m:s" }}</td>
+                                            <td>{{ downtime.start_time|date:"D, d-M-Y H:i:s"  }}</td>
+                                            <td>{{ downtime.end_time|date:"D, d-M-Y H:i:s" }}</td>
                                             <td>{{ downtime.duration|format_duration }}</td>
                                             <td>{% for dt_role in downtime_roles %}
                                                 {% if dt_role.data.downtime.id == downtime.id %}

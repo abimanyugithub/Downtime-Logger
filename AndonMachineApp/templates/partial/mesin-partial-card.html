@@ -4,14 +4,23 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="me-3">
-                    <div class="text-white-75 small">{{ mesin.data.category_machine|upper }}</div>
-                    <div class="text-lg fw-bold">{{ mesin.data.no_machine}} {{ mesin.no_machine}}</div>
+                    <!-- <div class="text-white-75 small">{{ mesin.data.category_machine|upper }}</div>
+                    <div class="text-lg fw-bold">{{ mesin.data.no_machine }}</div> -->
+                    <div class="text-lg fw-bold small">{{ mesin.data.category_machine|upper }}</div>
+                    {% comment %}<div class="text-white-75 small">{{ mesin.start_time|date:'D, d-M-Y H:i:s' }}</div>{% endcomment %}
+                        {% for role in mesin.badge_roles %}
+                            <span class="badge bg-secondary">{{ role }}</span>
+                        {% empty %}
+                            <span class="badge {% if mesin.data.is_active %}bg-primary{% else %}bg-dark{% endif %}">{{ mesin.data.status }}</span>
+                        {% endfor %}
                 </div>
-                <i class="feather-xl text-white-50" data-feather="check-square"></i>
+                
+                <div class=" display-6 fw-bold">{{ mesin.data.no_machine }}</div>
+                <!-- <i class="feather-xl text-white-50" data-feather="file"></i> -->
             </div>
         </div>
         <div class="card-footer d-flex align-items-center justify-content-between small">
-            <a class="text-white stretched-link" href="{% url 'view_andon' %}?category={{ mesin.data.category_machine }}&machine={{ mesin.data.no_machine}}">View Tasks</a>
+            <a class="text-white stretched-link" href="{% url 'view_andon' %}?category={{ mesin.data.category_machine }}&machine={{ mesin.data.no_machine}}">Go to Andon</a>
             <div class="text-white"><i class="fas fa-angle-right"></i></div>
         </div>
     </div>

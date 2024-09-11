@@ -365,6 +365,19 @@ table {
   /* cursor: pointer; Optional: changes the cursor to a pointer */
 }
 
+.blinking-card {
+  border-radius: 48px 0px; 
+  border: 0px solid #6C8003;
+  background-color: #8EDDBE; /* Initial background color */
+  color: white;
+  animation: blink 1s linear infinite; /* Adjust duration as needed */
+}
+
+@keyframes blink {
+  0%, 100% { background-color: #f70c5a; } /* Red */
+  50% { background-color: #f7a40c; } /* Orange */
+}
+
 caption {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;

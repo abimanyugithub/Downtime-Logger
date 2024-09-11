@@ -24,35 +24,35 @@
                                     <div class="col-auto mt-4">
                                         <h1 class="page-header-title">
                                             <div class="page-header-icon"><i data-feather="activity"></i></div>
-                                            Dashboard {{ kategori_mesin.label|capfirst }}
+                                            Dashboard {{ kategori_mesin.label|capfirst }} {% if role_filter %}({{ role_filter }}){% endif %}
                                         </h1>
                                         <div class="page-header-subtitle">Dashboard overview list of {{ kategori_mesin.value }} machine(s)</div>
+                                    </div>
+                                    <div class="col-auto mt-4">
+                                        <div class="dropdown">
+                                            <button class="btn btn-transparent-light dropdown-toggle" id="dropdownFadeInUp" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="me-2" data-feather="filter"></i>Filter by role</button>
+                                            <div class="dropdown-menu animated--fade-in-up" aria-labelledby="dropdownFadeInUp">
+                                                {% for role in roles %}
+                                                    <a class="dropdown-item" href="{% url 'view_dashboard' %}?category={% if kategori_mesin %}{{ kategori_mesin.value }}{% else %}all{% endif %}&role={{ role.value|capfirst }}">{{ role.value|capfirst }}</a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
                     </header>
-                    <!-- Main page content-->
-                    <div class="container-xl px-4 mt-n10">
-                        <h4 class="mb-0 mt-5 text-white">Select Roles</h4>
-                        <hr class="mt-2 mb-4 text-white" />
-                        <div class="row">
-                        {% for role in roles %}
-                        <div class="col-6">
-                            <a class="card card-icon lift lift-sm mb-4" href="{% url 'view_dashboard_new' %}?category={{ kategori_mesin.value }}&role={{ role.value }}">
-                                <div class="row g-0">
-                                    <div class="col-3 card-icon-aside bg-secondary"><i class="text-white-50" data-feather="users"></i></div>
-                                    <div class="col">
-                                        <div class="card-body py-5">
-                                            <h5 class="card-title text-secondary mb-2">{{ role.value|upper }}</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        {% endfor %}
+
+                    <div class="container-xl px-4 mt-n10">                  
+                        <!-- Example Colored Cards for Dashboard Demo-->
+                        <div class="row"
+                        hx-get="{% url 'async_card' %}?category={% if kategori_mesin %}{{ kategori_mesin.value }}{% else %}all{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}"
+                        hx-trigger="load, every 2s">
+                            
                         </div>
                     </div>
+                    {{ list_mesin }}
                     
                 </main>
 

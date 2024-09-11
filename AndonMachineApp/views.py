@@ -12,16 +12,20 @@ dict_first_roles = [{'value': 'leader', 'label': 'Production Leader'}]
 dict_roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'maintenance', 'label': 'Maintenance Department'}, {'value': 'mold', 'label': 'Mold Division'}]
 
 
+'''
 class Index(TemplateView):
     template_name = 'base/index.html'
+'''
     
-
 class Dashboard(TemplateView):
     template_name = 'base/dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         kategori_mesin = self.request.GET.get('category')
+
+        # kembalikan dari get filter role
+        role_filter = self.request.GET.get('role')
 
         # using dict.get() with a temporary dictionary
         temp_dict = {k['value']: k for k in dict_category_machine}
@@ -32,22 +36,11 @@ class Dashboard(TemplateView):
         # Sort the combined list by the 'value' key
         sorted_combined_roles = sorted(combined_roles, key=lambda x: x['value'])
         context['roles'] = sorted_combined_roles
+        context['role_filter'] = role_filter
+
         return context
     
     
-class DashboardNew(TemplateView):
-    template_name = 'base/dashboard_new.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        kategori_mesin = self.request.GET.get('category')
-
-        # using dict.get() with a temporary dictionary
-        temp_dict = {k['value']: k for k in dict_category_machine}
-        selected_category = temp_dict.get(kategori_mesin)
-        context['kategori_mesin'] = selected_category
-        return context
-
 class ListMesin(ListView):
     template_name = 'crud_mesin/list_machines.html'
     model = Mesin
@@ -91,42 +84,102 @@ class UpdateMesin(UpdateView):
         context = super().get_context_data(**kwargs)
         context['kategori_mesin'] = dict_category_machine
         return context
-
-'''def AsyncMesin(request):
+    
+'''
+def AsyncMesin(request):
     list_mesin = Mesin.objects.all()
-    return render(request, 'partial/mesin-partial.html', {'list_mesin': list_mesin})'''
+    return render(request, 'partial/mesin-partial.html', {'list_mesin': list_mesin})
+'''
 
 def AsyncMesinCard(request):
     kategori_mesin = request.GET.get('category')
-    get_role = request.GET.get('role')
-    
-    # Check for downtime related to the given role for the current machine
-    # downtime_exists = DowntimeRole.objects.filter(status="waiting", role=get_role)
+    role_filter = request.GET.get('role')
 
-    # Ensure get_role is not None before performing the query
-    '''if kategori_mesin and get_role:
-        downtime_exists = DowntimeRole.objects.filter(status="waiting", role=get_role)
+    # Fetch the list of machines based on category
+    if kategori_mesin == 'all':
+        list_mesin = Mesin.objects.all().order_by('category_machine', 'no_machine')
+    elif kategori_mesin:
+        list_mesin = Mesin.objects.filter(category_machine=kategori_mesin).order_by('no_machine')
     else:
-        # Handle the case where 'role' is not provided or is None
-        downtime_exists = DowntimeRole.objects.filter(status="waiting")
+        list_mesin = Mesin.objects.none()  # No machines if no category is provided
 
-    # Determine color based on whether downtime exists
-    if downtime_exists:
-        bg_color = 'bg-teal'  # Example color if downtime exists
-    else:
-        bg_color = 'bg-teal'  # Example color if no downtime
-
-    # Prepare list mesin dengan beberapa komponen "color"
+    # Prepare list with colors based on roles or default
     mesin_card_color = []
-    # Append machine with its color
-    mesin_card_color.append({
-        'bg_color': bg_color
-    })'''
+    
+    if role_filter:
+        downtime_roles = DowntimeRole.objects.filter(role=role_filter)
 
-    downtime_exists = DowntimeRole.objects.filter(status="waiting", role=get_role)
+        for data in list_mesin:
+            
+            
+            
 
+            # Default background color
+            if data.is_active and (data.status == "maintain" or data.status == "pending"):
+                bg_color = 'bg-indigo'
+            elif data.is_active:
+                bg_color = 'bg-teal'
+            else:
+                bg_color = 'bg-gray-200'
 
-    return render(request, 'partial/mesin-partial-card.html', {'list_mesin': downtime_exists})
+            start_time = ''  # Initialize start_time
+            
+            # Check for downtime roles
+            for dtr in downtime_roles:
+                if data.id == dtr.downtime.machine.id:
+                    if dtr.status == 'waiting':
+                        bg_color = 'blinking-card'
+                        start_time = dtr.downtime.start_time
+                    elif dtr.status == 'onhand':
+                        bg_color = 'bg-yellow'
+                        start_time = dtr.downtime.start_time
+            
+            badge_roles = []  # Initialize badge_roles list
+            # Check for downtime roles to get badge_roles
+            downtime_roles = DowntimeRole.objects.filter(downtime__machine=data, status="onhand")
+            for dtr in downtime_roles:
+                badge_roles.append(dtr.role) # Collect all roles with 'onhand' status
+            
+
+            # Append machine and its background color to the list
+            mesin_card_color.append({
+                'data': data,
+                'bg_color': bg_color,
+                'start_time': start_time,
+                'badge_roles': badge_roles,
+            })
+
+    else:
+        for data in list_mesin:
+            downtime_mesin = DowntimeMesin.objects.filter(machine=data)
+            start_time = ''  # Initialize start_time
+            badge_roles = []  # Initialize badge_roles list
+
+            if data.is_active and data.status == "ready":
+                bg_color = 'bg-teal'
+            elif data.is_active and (data.status == "maintain" or data.status == "pending"):
+                bg_color = 'bg-warning'
+                # Check for downtime roles
+                for dtm in downtime_mesin:
+                    if data.id == dtm.machine.id:
+                        start_time = dtm.start_time
+            else:
+                bg_color = 'bg-gray-200'
+
+            # Check for downtime roles to get badge_roles
+            downtime_roles = DowntimeRole.objects.filter(downtime__machine=data, status="onhand")
+            for dtr in downtime_roles:
+                badge_roles.append(dtr.role) # Collect all roles with 'onhand' status
+
+            # Append machine and its background color to the list
+            mesin_card_color.append({
+                'data': data,
+                'bg_color': bg_color,
+                'start_time': start_time,
+                'badge_roles':badge_roles
+            })
+
+    return render(request, 'partial/mesin-partial-card.html', {'list_mesin': mesin_card_color})
 
 
 class UpdateStatusMesin(View):
@@ -135,8 +188,11 @@ class UpdateStatusMesin(View):
         status_mesin = get_object_or_404(Mesin, pk=pk)
 
         if status_mesin.is_active:
-            status_mesin.is_active = False
-            status_mesin.status = "off"
+            if not status_mesin.status == 'ready':
+                return redirect(self.request.META.get('HTTP_REFERER'))
+            else:
+                status_mesin.is_active = False
+                status_mesin.status = "off"
         else:
             status_mesin.is_active = True
             status_mesin.status = "ready"
@@ -264,13 +320,15 @@ class DisplayAndon(TemplateView):
             if ((mesin.status == 'maintain') or (mesin.status == 'pending')):
                 context['multicontext_roles'] = multicontext_roles
 
-                '''downtime = timezone.now() - downtime_mesin.start_time
+                '''
+                downtime = timezone.now() - downtime_mesin.start_time
                 downtime_seconds = int(downtime.total_seconds())
                 hours, remainder = divmod(downtime_seconds, 3600)
                 minutes, seconds = divmod(remainder, 60)
                 formatted_downtime = f"{hours:02}:{minutes:02}:{seconds:02}"
 
-                context['downtime_rundown'] = formatted_downtime'''
+                context['downtime_rundown'] = formatted_downtime
+                '''
 
                 context['start_time'] = downtime_mesin.start_time
                 context['bg_status'] = 'bg-warning'
