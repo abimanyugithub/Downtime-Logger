@@ -11,7 +11,6 @@ dict_category_machine =  [{'value': 'blow', 'label': 'Blow Molding Machine'}, {'
 dict_first_roles = [{'value': 'leader', 'label': 'Production Leader'}]
 dict_roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'maintenance', 'label': 'Maintenance Department'}, {'value': 'mold', 'label': 'Mold Division'}]
 
-
 '''
 class Index(TemplateView):
     template_name = 'base/index.html'
