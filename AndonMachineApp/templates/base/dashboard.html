@@ -24,7 +24,7 @@
                                     <div class="col-auto mt-4">
                                         <h1 class="page-header-title">
                                             <div class="page-header-icon"><i data-feather="activity"></i></div>
-                                            Dashboard {{ kategori_mesin.label|capfirst }} {% if role_filter %}({{ role_filter }}){% endif %}
+                                            Dashboard {{ kategori_mesin.label|capfirst }} {% if role_filter %}({{ role_filter|capfirst }}){% endif %}
                                         </h1>
                                         <div class="page-header-subtitle">Dashboard overview list of {{ kategori_mesin.value }} machine(s)</div>
                                     </div>
@@ -33,7 +33,7 @@
                                             <button class="btn btn-transparent-light dropdown-toggle" id="dropdownFadeInUp" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="me-2" data-feather="filter"></i>Filter by role</button>
                                             <div class="dropdown-menu animated--fade-in-up" aria-labelledby="dropdownFadeInUp">
                                                 {% for role in roles %}
-                                                    <a class="dropdown-item" href="{% url 'view_dashboard' %}?category={% if kategori_mesin %}{{ kategori_mesin.value }}{% else %}all{% endif %}&role={{ role.value|capfirst }}">{{ role.value|capfirst }}</a>
+                                                    <a class="dropdown-item" href="{% url 'view_dashboard' %}?category={% if kategori_mesin %}{{ kategori_mesin.value }}{% else %}all{% endif %}&role={{ role.value }}">{{ role.value|capfirst }}</a>
                                                 {% endfor %}
                                             </div>
                                         </div>
@@ -55,6 +55,7 @@
                     {{ list_mesin }}
                     
                 </main>
+                
 
                 {% block footer %}
                     {% include "base/footer.html" %}

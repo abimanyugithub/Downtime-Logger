@@ -10,6 +10,7 @@ from django.middleware.csrf import get_token
 dict_category_machine =  [{'value': 'blow', 'label': 'Blow Molding Machine'}, {'value': 'injection', 'label': 'Injection Molding Machine'}]
 dict_first_roles = [{'value': 'leader', 'label': 'Production Leader'}]
 dict_roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'maintenance', 'label': 'Maintenance Department'}, {'value': 'mold', 'label': 'Mold Division'}]
+combined_roles = dict_first_roles + dict_roles
 
 '''
 class Index(TemplateView):
@@ -18,6 +19,22 @@ class Index(TemplateView):
     
 class Dashboard(TemplateView):
     template_name = 'base/dashboard.html'
+
+    '''
+    def dispatch(self, request, *args, **kwargs):
+        role_filter = self.request.GET.get('role')
+
+        # Extract valid role values
+        valid_roles = [item['value'] for item in combined_roles]
+
+        # Check if role_filter is in valid roles and update the context
+        if role_filter in valid_roles:
+            pass
+        else:
+            return redirect(reverse('view_dashboard'))
+            
+        return super().dispatch(request, *args, **kwargs)
+    '''
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -31,11 +48,16 @@ class Dashboard(TemplateView):
         selected_category = temp_dict.get(kategori_mesin)
         context['kategori_mesin'] = selected_category
 
-        combined_roles = dict_first_roles + dict_roles
         # Sort the combined list by the 'value' key
         sorted_combined_roles = sorted(combined_roles, key=lambda x: x['value'])
         context['roles'] = sorted_combined_roles
-        context['role_filter'] = role_filter
+
+        # Extract valid role values
+        valid_roles = [item['value'] for item in combined_roles]
+
+        # Check if role_filter is in valid roles and update the context
+        if role_filter in valid_roles:
+            context['role_filter'] = role_filter
 
         return context
     
@@ -109,9 +131,6 @@ def AsyncMesinCard(request):
         downtime_roles = DowntimeRole.objects.filter(role=role_filter)
 
         for data in list_mesin:
-            
-            
-            
 
             # Default background color
             if data.is_active and (data.status == "maintain" or data.status == "pending"):
@@ -220,7 +239,7 @@ class DisplayAndon(TemplateView):
                 return redirect(self.request.META.get('HTTP_REFERER'))
                 
         else:
-            return redirect(reverse('view_index'))
+            return redirect(reverse('view_dashboard'))
             
         return super().dispatch(request, *args, **kwargs)
 
@@ -233,7 +252,6 @@ class DisplayAndon(TemplateView):
         try:
 
             # status "ready" atau "pending" enable tombol leader, disable lainnya
-            combined_roles = dict_first_roles + dict_roles
             context['roles'] = combined_roles
             if ((mesin.status == 'ready')):
                 context['disabled_roles'] = {role['value'] for role in dict_roles}
@@ -494,9 +512,6 @@ class ListDowntimeMesin(ListView):
     
 
 def ControlTrigger(request):
-
-    # Combine the two lists
-    combined_roles = dict_first_roles + dict_roles
 
     # Create a set of all possible role values (for validation if needed)
     role_values = {role['value'] for role in combined_roles}
