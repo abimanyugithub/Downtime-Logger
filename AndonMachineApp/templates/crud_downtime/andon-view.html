@@ -5,16 +5,16 @@
         {% include "base/header.html" %}
     {% endblock header %}
     <body class="bg-blue">
-        <div id="layoutAuthentication">
-            <div id="layoutAuthentication_content">
+        <div id="layoutError">
+            <div id="layoutError_content">
                 <main>
-                    <div class="container-xl ">
+                    <div class="container-xl">
                         <div class="card shadow-lg rounded-lg mt-2 mb-2">
                             <div class="card-body sbp-preview">
-                                <div class="row ">
+                                <div class="row">
                                     <div class="col-md-3 border border-blue d-flex justify-content-center align-items-center">
                                         <div class="text-center my-4">
-                                            <h1 class="mb-2 display-1 fw-bold"><img src="{% static 'images/login_image.png' %}" alt="logo" class="w-100" ></h1>
+                                            <h1 class="mb-2 display-1 fw-bold"><img src="{% static 'images/login_image.png' %}" alt="logo" class="w-75" ></h1>
                                         </div>
                                     </div>
                                     <div class="col-md-6 border border-blue">
@@ -42,12 +42,13 @@
                                     </div>
                                 </div>
                             </div>
+                            
                         </div>
-                        <div class="row justify-content-center">
-                            <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-6 mt-2">
                                 <!-- Basic login form-->
-                                <div class="card shadow-lg border-0 rounded-lg mt-2">
-                                    <div class="card-header">Action</div>
+                                <div class="card shadow-lg border-0 rounded-lg">
+                                    <div class="card-header">Action Roles</div>
                                     <div class="card-body">
                                         <!-- Component Preview-->
                                         <div class="sbp-preview">
@@ -67,10 +68,10 @@
                                 </div>
                             </div>       
 
-                            <div class="col-lg-6">
+                            <div class="col-lg-6 mt-2">
                                <!-- Basic login form-->
-                                <div class="card shadow-lg border-0 rounded-lg mt-2">
-                                    <div class="card-header">Machine Detail</div>
+                                <div class="card shadow-lg border-0 rounded-lg">
+                                    <div class="card-header">Downtime Roles</div>
                                         <div class="card-body">
                                             {{ btnfinish|safe }}
                                             {% for dt_role in multicontext_roles %}
@@ -105,9 +106,10 @@
                                     </div>
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
-                    <div class="container-xl px-4">
+                    {% comment %}<div class="container-xl px-4">
                         <div class="row justify-content-center">
                             <div class="col-lg-6">
                                 <div class="text-center mt-4">
@@ -118,10 +120,9 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>{% endcomment %}
                 </main>
-            </div>
-            <div id="layoutAuthentication_footer">
+            </div><div id="layoutError_footer">
 
                 {% block footer %}
                     {% include "base/footer.html" %}
@@ -133,6 +134,10 @@
         {% block javascript %}
             {% include "base/javascript.html" %}
         {% endblock javascript %}
+
+        {% block javascript_custom %}
+            {% include "base/custom-js.html" %}
+        {% endblock javascript_custom %}
 
     </body>
 </html>
