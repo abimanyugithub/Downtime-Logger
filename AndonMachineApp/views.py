@@ -9,7 +9,7 @@ from django.middleware.csrf import get_token
 
 dict_category_machine =  [{'value': 'blow', 'label': 'Blow Molding Machine'}, {'value': 'injection', 'label': 'Injection Molding Machine'}]
 dict_first_roles = [{'value': 'leader', 'label': 'Production Leader'}]
-dict_roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'maintenance', 'label': 'Maintenance Department'}, {'value': 'mold', 'label': 'Mold Division'}]
+dict_roles =  [{'value': 'setter', 'label': 'Setter'}, {'value': 'mtc', 'label': 'Maintenance Department'}, {'value': 'mold', 'label': 'Mold Division'}]
 combined_roles = dict_first_roles + dict_roles
 
 '''
