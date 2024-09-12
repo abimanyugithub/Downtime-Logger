@@ -5,7 +5,7 @@
 __pycache__/
 local_settings.py
 db.sqlite3
-DowntimeLogger/AndonMachineApp/media/
+AndonMachineApp/media/
 
 # Ignore migrations, as they can be generated locally and might cause conflicts
 # **/migrations/*.py
